@@ -6,12 +6,13 @@ import '../../../domain/entities/payment_method.dart';
 import 'checkout_event.dart';
 import 'checkout_state.dart';
 import '../order/order_event.dart';
+import '../order/order_bloc.dart';
 
-class CheckoutBloc extends Bloc<CheckoutEvent, CheckoutState> {  // Added type parameters
+class CheckoutBloc extends Bloc<CheckoutEvent, CheckoutState> {
   final OrderRepository orderRepo;
-  final _orderBloc;
+  final OrderBloc _orderBloc;
 
-  CheckoutBloc({required this.orderRepo, required orderBloc})
+  CheckoutBloc({required this.orderRepo, required OrderBloc orderBloc})
       : _orderBloc = orderBloc,
         super(const CheckoutState()) {
     on<LoadCheckoutData>(_onLoadData);
@@ -21,23 +22,23 @@ class CheckoutBloc extends Bloc<CheckoutEvent, CheckoutState> {  // Added type p
     on<PlaceOrder>(_onPlaceOrder);
   }
 
-  void _onLoadData(LoadCheckoutData event, Emitter<CheckoutState> emit) {  // Added type parameter
+  void _onLoadData(LoadCheckoutData event, Emitter<CheckoutState> emit) {
     emit(state.copyWith(items: event.items));
   }
 
-  void _onSelectAddress(SelectAddress event, Emitter<CheckoutState> emit) {  // Added type parameter
+  void _onSelectAddress(SelectAddress event, Emitter<CheckoutState> emit) {
     emit(state.copyWith(selectedAddress: event.address));
   }
 
-  void _onSelectPaymentMethod(SelectPaymentMethod event, Emitter<CheckoutState> emit) {  // Added type parameter
+  void _onSelectPaymentMethod(SelectPaymentMethod event, Emitter<CheckoutState> emit) {
     emit(state.copyWith(selectedPayment: event.paymentMethod));
   }
 
-  void _onApplyPromoCode(ApplyPromoCode event, Emitter<CheckoutState> emit) {  // Added type parameter
+  void _onApplyPromoCode(ApplyPromoCode event, Emitter<CheckoutState> emit) {
     emit(state.copyWith(promoCode: event.code));
   }
 
-  Future<void> _onPlaceOrder(PlaceOrder event, Emitter<CheckoutState> emit) async {  // Added type parameter and return type
+  Future<void> _onPlaceOrder(PlaceOrder event, Emitter<CheckoutState> emit) async {
     if (state.selectedAddress == null || state.selectedPayment == null) {
       emit(state.copyWith(error: 'Please select address and payment method.'));
       return;
@@ -47,7 +48,7 @@ class CheckoutBloc extends Bloc<CheckoutEvent, CheckoutState> {  // Added type p
     try {
       // Pass OrderItem objects directly to repository
       final order = await orderRepo.createOrder(
-        items: state.items,  // Pass actual OrderItem objects instead of IDs
+        items: state.items,
         address: state.selectedAddress!,
         payment: state.selectedPayment!,
       );
