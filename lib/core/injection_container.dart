@@ -7,7 +7,7 @@ import 'package:http/http.dart' as http;
 
 import '../data/datasources/cart_local_data_source.dart';
 import '../data/datasources/order_remote_data_source.dart';
-import '../data/datasources/user_remote_data_source.dart'; // Added import
+import '../data/datasources/user_remote_data_source.dart';
 import '../data/repositories/restaurant_repository_impl.dart';
 import '../data/repositories/menu_repository_impl.dart';
 import '../data/repositories/cart_repository_impl.dart';
@@ -21,7 +21,8 @@ import '../presentation/bloc/menu/menu_bloc.dart';
 import '../presentation/bloc/cart/cart_bloc.dart';
 import '../presentation/bloc/order/order_bloc.dart';
 import '../presentation/bloc/checkout/checkout_bloc.dart';
-import '../presentation/bloc/profile/profile_bloc.dart';    // Added import
+import '../presentation/bloc/profile/profile_bloc.dart';
+import '../presentation/bloc/search/search_bloc.dart';
 
 final sl = GetIt.instance;
 
@@ -49,7 +50,7 @@ Future<void> init() async {
   sl.registerLazySingleton<OrderRemoteDataSource>(
     () => OrderRemoteDataSourceImpl(firestore: sl()),
   );
-  sl.registerLazySingleton<UserRemoteDataSource>(              // Added registration
+  sl.registerLazySingleton<UserRemoteDataSource>(
     () => UserRemoteDataSourceImpl(firestore: sl()),
   );
 
@@ -76,6 +77,13 @@ Future<void> init() async {
     () => CheckoutBloc(orderRepo: sl(), orderBloc: sl()),
   );
   sl.registerFactory(
-    () => ProfileBloc(remote: sl()),                         // Added registration
+    () => ProfileBloc(remote: sl()),
+  );
+  sl.registerFactory(
+    () => SearchBloc(
+      restaurantRepository: sl(),
+      menuRepository: sl(),
+      prefs: sl(),
+    ),
   );
 }

@@ -34,6 +34,7 @@ class _ProfilePageState extends State<ProfilePage> {
         title: const Text('My Profile'),
         backgroundColor: Colors.white,
         elevation: 1,
+        automaticallyImplyLeading: false, // Added this line only
       ),
       body: BlocConsumer<ProfileBloc, ProfileState>(
         listener: (context, state) {
@@ -204,7 +205,7 @@ class _ProfilePageState extends State<ProfilePage> {
     return ListTile(
       leading: Icon(icon, color: color ?? Colors.grey[700]),
       title: Text(title, style: TextStyle(color: color ?? Colors.black87)),
-      trailing: Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey[500]),
+      trailing: Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
       onTap: onTap,
     );
   }
