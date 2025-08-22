@@ -41,6 +41,7 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
         title: const Text('Order History'),
         backgroundColor: Colors.orange,
         foregroundColor: Colors.white,
+        automaticallyImplyLeading: false, // Added this line only
       ),
       body: StreamBuilder<User?>(
         stream: FirebaseAuth.instance.authStateChanges(),
@@ -59,7 +60,7 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
                   const SizedBox(height: 16),
                   Text(
                     'Please sign in to view your orders',
-                    style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                    style: TextStyle(fontSize: 16, color: Colors.grey),
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton(
@@ -92,7 +93,7 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
                       Text(
                         'Error: ${state.error}',
                         style:
-                            TextStyle(fontSize: 16, color: Colors.grey[600]),
+                            TextStyle(fontSize: 16, color: Colors.grey),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 16),
@@ -202,7 +203,7 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
                   style: TextStyle(fontSize: 12, color: Colors.grey[600])),
               const SizedBox(height: 8),
               Text('${order.items.length} item${order.items.length > 1 ? 's' : ''}',
-                  style: TextStyle(fontSize: 14, color: Colors.grey[700])),
+                  style: TextStyle(fontSize: 14, color: Colors.grey)),
               const SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -212,7 +213,7 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
                   TextButton(
                     onPressed: () {
                       ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Order details coming soon!'), backgroundColor: Colors.orange));
+                        const SnackBar(content: Text('Order details coming soon!'), backgroundColor: Colors.orange));
                     },
                     child: const Text('View Details', style: TextStyle(color: Colors.orange)),
                   ),

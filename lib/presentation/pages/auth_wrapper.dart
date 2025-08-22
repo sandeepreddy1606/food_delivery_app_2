@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'login_page.dart';
-import 'home_page.dart';
+import 'main_navigation_page.dart'; // Added this import
 
 class AuthWrapper extends StatelessWidget {
   const AuthWrapper({Key? key}) : super(key: key);
@@ -21,7 +21,7 @@ class AuthWrapper extends StatelessWidget {
         }
         // Show home page if user is authenticated
         if (snapshot.hasData && snapshot.data != null) {
-          return const HomePage();
+          return const MainNavigationPage(); // Changed from HomePage to MainNavigationPage
         }
         // Show login page if user is not authenticated
         return const LoginPage();

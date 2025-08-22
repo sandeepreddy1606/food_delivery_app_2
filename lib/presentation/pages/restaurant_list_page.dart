@@ -1,24 +1,27 @@
+// lib/presentation/pages/restaurant_list_page.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../core/injection_container.dart';
 import '../../domain/entities/restaurant.dart';
 import '../bloc/restaurant/restaurant_bloc.dart';
-import 'restaurant_detail_page.dart';  // Added import for detail page
+import '../widgets/floating_cart_button.dart';
+import 'restaurant_detail_page.dart';
 
 class RestaurantListPage extends StatelessWidget {
-  const RestaurantListPage({super.key});
+  const RestaurantListPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
+    return BlocProvider<RestaurantBloc>(
       create: (context) => sl<RestaurantBloc>()..add(FetchRestaurants()),
-      child: const RestaurantListView(),
+      child: RestaurantListView(),
     );
   }
 }
 
 class RestaurantListView extends StatefulWidget {
-  const RestaurantListView({super.key});
+  const RestaurantListView({Key? key}) : super(key: key);
 
   @override
   State<RestaurantListView> createState() => _RestaurantListViewState();
@@ -54,22 +57,23 @@ class _RestaurantListViewState extends State<RestaurantListView> {
       ),
       body: Column(
         children: [
-          _buildSearchBar(),
-          _buildCategoryFilter(),
+          _buildSearchBar(context),
+          _buildCategoryFilter(context),
           Expanded(child: _buildRestaurantList()),
         ],
       ),
+      floatingActionButton: const FloatingCartButton(),
     );
   }
 
-  Widget _buildSearchBar() {
+  Widget _buildSearchBar(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withOpacity(0.1), // or .withAlpha(25)
             spreadRadius: 1,
             blurRadius: 3,
             offset: const Offset(0, 1),
@@ -86,7 +90,7 @@ class _RestaurantListViewState extends State<RestaurantListView> {
                   icon: const Icon(Icons.clear),
                   onPressed: () {
                     _searchController.clear();
-                    context.read<RestaurantBloc>().add(const SearchRestaurants(''));
+                    context.read<RestaurantBloc>().add(FetchRestaurants());
                   },
                 )
               : null,
@@ -96,7 +100,8 @@ class _RestaurantListViewState extends State<RestaurantListView> {
           ),
           filled: true,
           fillColor: Colors.grey[100],
-          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
         ),
         onChanged: (query) {
           context.read<RestaurantBloc>().add(SearchRestaurants(query));
@@ -105,7 +110,7 @@ class _RestaurantListViewState extends State<RestaurantListView> {
     );
   }
 
-  Widget _buildCategoryFilter() {
+  Widget _buildCategoryFilter(BuildContext context) {
     return Container(
       height: 60,
       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -128,12 +133,14 @@ class _RestaurantListViewState extends State<RestaurantListView> {
                 if (category == 'All') {
                   context.read<RestaurantBloc>().add(FetchRestaurants());
                 } else {
-                  context.read<RestaurantBloc>().add(FilterRestaurantsByCategory(category));
+                  context
+                      .read<RestaurantBloc>()
+                      .add(FilterRestaurantsByCategory(category));
                 }
               },
               selectedColor: Colors.orange.withOpacity(0.3),
               checkmarkColor: Colors.orange,
-              backgroundColor: Colors.grey[200],
+              backgroundColor: Colors.grey,
             ),
           );
         },
@@ -145,12 +152,13 @@ class _RestaurantListViewState extends State<RestaurantListView> {
     return BlocBuilder<RestaurantBloc, RestaurantState>(
       builder: (context, state) {
         if (state is RestaurantLoading) {
-          return const Center(child: CircularProgressIndicator(color: Colors.orange));
+          return const Center(
+              child: CircularProgressIndicator(color: Colors.orange));
         } else if (state is RestaurantError) {
-          return _buildErrorWidget(state.message);
+          return Center(child: Text(state.message));
         } else if (state is RestaurantLoaded) {
           if (state.restaurants.isEmpty) {
-            return _buildEmptyWidget();
+            return Center(child: Text('No restaurants found'));
           }
           return RefreshIndicator(
             onRefresh: () async {
@@ -160,12 +168,13 @@ class _RestaurantListViewState extends State<RestaurantListView> {
               padding: const EdgeInsets.all(16),
               itemCount: state.restaurants.length,
               itemBuilder: (context, index) {
-                return _buildRestaurantCard(state.restaurants[index]);
+                final restaurant = state.restaurants[index];
+                return _buildRestaurantCard(restaurant);
               },
             ),
           );
         }
-        return const Center(child: Text('Welcome! Pull down to refresh.'));
+        return const SizedBox.shrink();
       },
     );
   }
@@ -177,11 +186,11 @@ class _RestaurantListViewState extends State<RestaurantListView> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
         onTap: () {
-          // Navigate to RestaurantDetailPage with the selected restaurant
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => RestaurantDetailPage(restaurant: restaurant),
+              builder: (context) =>
+                  RestaurantDetailPage(restaurant: restaurant),
             ),
           );
         },
@@ -190,7 +199,8 @@ class _RestaurantListViewState extends State<RestaurantListView> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(16)),
               child: Stack(
                 children: [
                   Image.network(
@@ -202,7 +212,8 @@ class _RestaurantListViewState extends State<RestaurantListView> {
                       return Container(
                         height: 200,
                         color: Colors.grey[300],
-                        child: const Icon(Icons.restaurant, size: 50, color: Colors.grey),
+                        child: const Icon(Icons.restaurant,
+                            size: 50, color: Colors.grey),
                       );
                     },
                   ),
@@ -210,7 +221,8 @@ class _RestaurantListViewState extends State<RestaurantListView> {
                     top: 12,
                     right: 12,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: restaurant.isOpen ? Colors.green : Colors.red,
                         borderRadius: BorderRadius.circular(12),
@@ -246,7 +258,8 @@ class _RestaurantListViewState extends State<RestaurantListView> {
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
                           color: Colors.orange[50],
                           borderRadius: BorderRadius.circular(20),
@@ -286,24 +299,22 @@ class _RestaurantListViewState extends State<RestaurantListView> {
                         ),
                       ),
                       const SizedBox(width: 16),
-                      Icon(Icons.access_time, color: Colors.grey[600], size: 20),
+                      Icon(Icons.access_time,
+                          color: Colors.grey[600], size: 20),
                       const SizedBox(width: 4),
                       Text(
                         '${restaurant.deliveryTime} min',
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 14,
-                        ),
+                        style:
+                            TextStyle(color: Colors.grey[600], fontSize: 14),
                       ),
                       const SizedBox(width: 16),
-                      Icon(Icons.delivery_dining, color: Colors.grey[600], size: 20),
+                      Icon(Icons.delivery_dining,
+                          color: Colors.grey, size: 20),
                       const SizedBox(width: 4),
                       Text(
                         '\$${restaurant.deliveryFee.toStringAsFixed(2)}',
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 14,
-                        ),
+                        style:
+                            TextStyle(color: Colors.grey[600], fontSize: 14),
                       ),
                     ],
                   ),
@@ -312,52 +323,6 @@ class _RestaurantListViewState extends State<RestaurantListView> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildErrorWidget(String message) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.error_outline, size: 64, color: Colors.grey[400]),
-          const SizedBox(height: 16),
-          Text(
-            message,
-            style: TextStyle(fontSize: 16, color: Colors.grey[600]),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () {
-              context.read<RestaurantBloc>().add(FetchRestaurants());
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-            child: const Text('Try Again'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEmptyWidget() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.restaurant_outlined, size: 64, color: Colors.grey[400]),
-          const SizedBox(height: 16),
-          Text(
-            'No restaurants found',
-            style: TextStyle(fontSize: 18, color: Colors.grey[600]),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Try adjusting your search or filters',
-            style: TextStyle(fontSize: 14, color: Colors.grey[500]),
-          ),
-        ],
       ),
     );
   }
