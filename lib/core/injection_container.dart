@@ -12,10 +12,12 @@ import '../data/repositories/restaurant_repository_impl.dart';
 import '../data/repositories/menu_repository_impl.dart';
 import '../data/repositories/cart_repository_impl.dart';
 import '../data/repositories/order_repository_impl.dart';
+import '../data/repositories/address_repository_impl.dart';
 import '../domain/repositories/restaurant_repository.dart';
 import '../domain/repositories/menu_repository.dart';
 import '../domain/repositories/cart_repository.dart';
 import '../domain/repositories/order_repository.dart';
+import '../domain/repositories/address_repository.dart';
 import '../presentation/bloc/restaurant/restaurant_bloc.dart';
 import '../presentation/bloc/menu/menu_bloc.dart';
 import '../presentation/bloc/cart/cart_bloc.dart';
@@ -23,25 +25,26 @@ import '../presentation/bloc/order/order_bloc.dart';
 import '../presentation/bloc/checkout/checkout_bloc.dart';
 import '../presentation/bloc/profile/profile_bloc.dart';
 import '../presentation/bloc/search/search_bloc.dart';
+import '../presentation/bloc/address/address_bloc.dart';
 
 final sl = GetIt.instance;
 
 Future<void> init() async {
   // External services
-  sl.registerLazySingleton<FirebaseAuth>(() => FirebaseAuth.instance);
-  sl.registerLazySingleton<FirebaseFirestore>(() => FirebaseFirestore.instance);
-  sl.registerLazySingleton<Dio>(() => Dio(
-        BaseOptions(
-          connectTimeout: const Duration(seconds: 30),
-          receiveTimeout: const Duration(seconds: 30),
-          sendTimeout: const Duration(seconds: 30),
-        ),
-      ));
-  sl.registerLazySingleton<http.Client>(() => http.Client());
+  sl.registerLazySingleton(() => FirebaseAuth.instance);
+  sl.registerLazySingleton(() => FirebaseFirestore.instance);
+  sl.registerLazySingleton(() => Dio(
+    BaseOptions(
+      connectTimeout: const Duration(seconds: 30),
+      receiveTimeout: const Duration(seconds: 30),
+      sendTimeout: const Duration(seconds: 30),
+    ),
+  ));
+  sl.registerLazySingleton(() => http.Client());
 
   // SharedPreferences
   final sharedPreferences = await SharedPreferences.getInstance();
-  sl.registerLazySingleton<SharedPreferences>(() => sharedPreferences);
+  sl.registerLazySingleton(() => sharedPreferences);
 
   // Data sources
   sl.registerLazySingleton<CartLocalDataSource>(
@@ -67,6 +70,9 @@ Future<void> init() async {
   sl.registerLazySingleton<OrderRepository>(
     () => OrderRepositoryImpl(remote: sl()),
   );
+  sl.registerLazySingleton<AddressRepository>(
+    () => AddressRepositoryImpl(sl()),
+  );
 
   // BLoCs
   sl.registerFactory(() => RestaurantBloc(repository: sl()));
@@ -86,4 +92,5 @@ Future<void> init() async {
       prefs: sl(),
     ),
   );
+  sl.registerFactory(() => AddressBloc(addressRepository: sl()));
 }

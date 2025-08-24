@@ -1,3 +1,5 @@
+// lib/presentation/pages/checkout_page.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entities/order_item.dart';
@@ -23,7 +25,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
   @override
   void initState() {
     super.initState();
-    // Load initial checkout items
     context.read<CheckoutBloc>().add(LoadCheckoutData(widget.items));
   }
 
@@ -52,10 +53,14 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () async {
                         final DeliveryAddress? picked =
-                            await Navigator.push<DeliveryAddress>(
+                            await Navigator.push<DeliveryAddress?>(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => const AddressSelectionPage(),
+                            builder: (_) => BlocProvider.value(
+                              value: context.read<CheckoutBloc>(),
+                              // Provide AddressBloc instead if AddressBloc drives AddressSelectionPage
+                              child: const AddressSelectionPage(),
+                            ),
                           ),
                         );
                         if (picked != null) {
@@ -77,7 +82,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () async {
                         final PaymentMethod? picked =
-                            await Navigator.push<PaymentMethod>(
+                            await Navigator.push<PaymentMethod?>(
                           context,
                           MaterialPageRoute(
                             builder: (_) =>

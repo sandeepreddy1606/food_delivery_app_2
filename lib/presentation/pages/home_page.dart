@@ -110,8 +110,9 @@ class HomeView extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SearchBarWidget(),
+              SizedBox(height: 4),
               PromoBannerWidget(),
+              SizedBox(height: 8),
               CategorySectionWidget(),
               SizedBox(height: 24),
               PopularDishesWidget(),
